@@ -1,0 +1,274 @@
+---
+import { ClientRouter } from 'astro:transitions';
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+const base = import.meta.env.BASE_URL;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+    <title>{title}</title>
+    <ClientRouter />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div class="site-shell">
+      <header class="site-header">
+        <a class="wordmark" href={base} aria-label=".NET Challenges home">
+          <span class="wordmark-mark" aria-hidden="true">DC</span>
+          <span>.NET <strong>CHALLENGES</strong></span>
+        </a>
+        <span class="header-note">Request-level practice</span>
+        <a class="header-link" href="https://github.com/mustafaAshfaq/dotnet-challenges">
+          Exercise repository
+        </a>
+      </header>
+      <slot />
+      <footer class="site-footer">
+        <span>Build the decision. Verify the effect.</span>
+        <a href="https://github.com/BirotySols/dotnet-challenges-site">Catalog source</a>
+      </footer>
+    </div>
+  </body>
+</html>
+
+<script>
+  const openReveals = new Set<string>();
+  const unlockedHints = new Set<string>();
+
+  const restoreReveals = () => {
+    const disclosures = document.querySelectorAll<HTMLDetailsElement>('[data-reveal]');
+
+    for (const disclosure of disclosures) {
+      const revealId = disclosure.dataset.reveal!;
+      const hintNumber = Number(disclosure.dataset.hintNumber);
+      const isOpen = openReveals.has(revealId);
+      disclosure.open = isOpen;
+      if (isOpen && hintNumber > 0) {
+        unlockedHints.add(`hint-${hintNumber}`);
+      }
+
+      if (disclosure.dataset.bound === 'true') {
+        continue;
+      }
+
+      disclosure.dataset.bound = 'true';
+      disclosure.addEventListener('toggle', () => {
+        if (disclosure.open) {
+          openReveals.add(revealId);
+          if (hintNumber > 0) {
+            unlockedHints.add(`hint-${hintNumber}`);
+          }
+        } else {
+          openReveals.delete(revealId);
+        }
+
+        updateHintGates();
+      });
+    }
+
+    updateHintGates();
+  };
+
+  const updateHintGates = () => {
+    for (const gate of document.querySelectorAll<HTMLElement>('[data-hint-gate]')) {
+      const previousHint = Number(gate.dataset.hintGate) - 1;
+      gate.hidden = !unlockedHints.has(`hint-${previousHint}`);
+    }
+  };
+
+  document.addEventListener('astro:page-load', restoreReveals);
+  restoreReveals();
+</script>
+
+<style is:global>
+  :root {
+    color-scheme: light;
+    --canvas: #f2f5f8;
+    --surface: #ffffff;
+    --surface-blue: #e8eefb;
+    --ink: #17243b;
+    --muted: #526278;
+    --line: #d7e0e9;
+    --blue: #244bc4;
+    --blue-strong: #183a9f;
+    --amber: #a64c0a;
+    --green: #1d684d;
+    --mono: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+    --body: "Segoe UI", "Helvetica Neue", system-ui, sans-serif;
+    --display: "Bahnschrift", "Arial Narrow", "Segoe UI", sans-serif;
+    font-family: var(--body);
+    color: var(--ink);
+    background: var(--canvas);
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    background: var(--canvas);
+    color: var(--ink);
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  a {
+    color: var(--blue);
+    text-decoration-thickness: 0.08em;
+    text-underline-offset: 0.18em;
+  }
+
+  a:hover {
+    color: var(--blue-strong);
+  }
+
+  :focus-visible {
+    outline: 3px solid #a64c0a;
+    outline-offset: 3px;
+    border-radius: 3px;
+  }
+
+  button,
+  summary {
+    font: inherit;
+  }
+
+  .site-shell {
+    width: min(100% - 2.5rem, 76rem);
+    margin-inline: auto;
+  }
+
+  .skip-link {
+    position: absolute;
+    z-index: 10;
+    inset-block-start: 0.75rem;
+    inset-inline-start: 0.75rem;
+    transform: translateY(-160%);
+    padding: 0.65rem 0.9rem;
+    background: var(--ink);
+    color: white;
+  }
+
+  .skip-link:focus {
+    transform: translateY(0);
+  }
+
+  .site-header {
+    min-height: 5.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .wordmark {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    color: var(--ink);
+    text-decoration: none;
+    font-family: var(--display);
+    font-size: 0.88rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+  }
+
+  .wordmark-mark {
+    width: 2rem;
+    height: 2rem;
+    display: grid;
+    place-items: center;
+    background: var(--blue);
+    color: white;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: -0.08em;
+  }
+
+  .wordmark strong {
+    color: var(--blue);
+  }
+
+  .header-note,
+  .header-link {
+    font-size: 0.86rem;
+  }
+
+  .header-note {
+    color: var(--muted);
+  }
+
+  .header-link {
+    font-weight: 650;
+  }
+
+  .site-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-block: 2rem;
+    margin-block-start: 4rem;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 0.84rem;
+  }
+
+  .site-footer a {
+    font-weight: 650;
+  }
+
+  .eyebrow,
+  .section-kicker,
+  .mono-label {
+    font-family: var(--mono);
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .eyebrow {
+    color: #b7c8ff;
+  }
+
+  @media (max-width: 650px) {
+    .site-shell {
+      width: min(100% - 1.5rem, 76rem);
+    }
+
+    .site-header {
+      min-height: 4.5rem;
+    }
+
+    .header-note {
+      display: none;
+    }
+
+    .header-link {
+      font-size: 0.78rem;
+      text-align: right;
+    }
+
+    .site-footer {
+      flex-direction: column;
+      margin-block-start: 2.5rem;
+    }
+  }
+</style>

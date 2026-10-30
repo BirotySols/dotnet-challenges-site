@@ -1,0 +1,669 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout
+  title="HTTP API contracts — .NET Challenges"
+  description="Practice the validation and problem-response decision for HTTP API writes."
+>
+  <main id="main" class="challenge">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href={base}>All available challenges</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">HTTP API contracts</span>
+    </nav>
+
+    <section class="hero" aria-labelledby="challenge-title">
+      <div class="hero-copy">
+        <p class="eyebrow">Sequence 01 <span>/ 09</span> · API ACTION</p>
+        <h1 id="challenge-title">HTTP API contracts</h1>
+        <p class="hero-summary">
+          Make an invalid write a clear response, not a change hidden in the store.
+        </p>
+      </div>
+      <div class="trace-card" aria-label="Example invalid request and its required effect">
+        <div class="trace-top">
+          <span>REQUEST TRACE</span>
+          <span>01 / 04</span>
+        </div>
+        <code class="route">POST /products</code>
+        <pre><code>{`{ "name": " ", "quantity": 0 }`}</code></pre>
+        <div class="trace-result">
+          <span class="status">400</span>
+          <span>problem names both fields</span>
+        </div>
+        <div class="trace-result stored-result">
+          <span class="state-mark" aria-hidden="true">=</span>
+          <span>stored product stays unchanged</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="content-grid">
+      <div class="main-column">
+        <section class="content-section decision" aria-labelledby="decision-title">
+          <p class="section-kicker">The decision</p>
+          <h2 id="decision-title">
+            A create or replace whose <code>name</code> has no non-whitespace character, or
+            whose <code>quantity</code> is outside 1 to 100, returns 400 with a problem
+            response that names each invalid member, and the stored product is unchanged.
+          </h2>
+        </section>
+
+        <section class="content-section effects" aria-labelledby="effects-title">
+          <div class="section-heading">
+            <div>
+              <p class="section-kicker">What a local pass proves</p>
+              <h2 id="effects-title">Required effects</h2>
+            </div>
+            <span class="effect-count">4 checks</span>
+          </div>
+          <p class="effect-contract">
+            Each test starts from an empty product store. No test reads or writes another
+            test's products. A local pass does not depend on test order. A 400 effect is
+            status 400, media type <code>application/problem+json</code>, and an
+            <code>errors</code> entry for every invalid member, matched without regard to
+            case. Message text, <code>type</code>, <code>title</code>, and
+            <code>traceId</code> stay outside the effect.
+          </p>
+          <ol class="effect-list">
+            <li>
+              <span class="effect-number">01</span>
+              <p>
+                <code>POST /products</code> with <code>{`{ "name": " ", "quantity": 0 }`}</code>
+                returns that 400, with <code>errors</code> entries for <code>name</code> and
+                <code>quantity</code>. <code>GET /products</code> returns an empty collection.
+              </p>
+            </li>
+            <li>
+              <span class="effect-number">02</span>
+              <p>
+                <code>POST /products</code> with <code>{`{ "name": "", "quantity": 101 }`}</code>
+                returns that same 400. <code>GET /products</code> returns an empty collection.
+              </p>
+            </li>
+            <li>
+              <span class="effect-number">03</span>
+              <p>
+                <code>POST /products</code> with <code>{`{ "name": "a", "quantity": 1 }`}</code>
+                returns 201. <code>GET /products</code> returns one product with that name and
+                quantity. <code>PUT /products/{`{id}`}</code> with
+                <code>{`{ "name": " ", "quantity": 0 }`}</code> returns that 400, and
+                <code>GET /products/{`{id}`}</code> still returns name <code>a</code> and
+                quantity 1. <code>PUT /products/{`{id}`}</code> with
+                <code>{`{ "name": "a", "quantity": 100 }`}</code> returns 204, and
+                <code>GET /products/{`{id}`}</code> returns name <code>a</code> and quantity 100.
+              </p>
+            </li>
+            <li>
+              <span class="effect-number">04</span>
+              <p>
+                <code>GET /products/{`{id}`}</code> for an id that is not stored returns 404.
+              </p>
+            </li>
+          </ol>
+          <p class="effect-boundary">
+            A replace of a product that is not stored is outside the effects, whether or not
+            the body breaks the rules. The harness replaces only a product that is already
+            stored.
+          </p>
+        </section>
+
+        <section class="content-section guidance" aria-labelledby="hints-title">
+          <p class="section-kicker">Ask for a nudge</p>
+          <h2 id="hints-title">Hints</h2>
+          <div class="disclosures">
+            <details data-reveal="http-hint-1" data-hint-number="1">
+              <summary><span>Hint 1</span><span class="summary-label">Name the behavior</span></summary>
+              <p>
+                A create or replace whose name has no non-whitespace character, or whose
+                quantity is outside 1 to 100, must return a problem response that names
+                each invalid member and must leave the stored product unchanged. A 400
+                whose body is a plain message still fails.
+              </p>
+            </details>
+            <div data-hint-gate="2" hidden>
+              <details data-reveal="http-hint-2" data-hint-number="2">
+                <summary><span>Hint 2</span><span class="summary-label">Find the framework area</span></summary>
+                <p>Model validation and validation problem details.</p>
+              </details>
+            </div>
+            <div data-hint-gate="3" hidden>
+              <details data-reveal="http-hint-3" data-hint-number="3">
+                <summary><span>Hint 3</span><span class="summary-label">Narrow the approach</span></summary>
+                <p>
+                  Validate the body before it is saved, on both writes, and return a
+                  validation problem that names the invalid members. A required-string
+                  check still accepts a name made only of spaces, so that create returns
+                  201 and stores the product.
+                </p>
+              </details>
+            </div>
+          </div>
+        </section>
+
+        <section class="content-section solution" aria-labelledby="solution-title">
+          <p class="section-kicker">See one working approach</p>
+          <h2 id="solution-title">Reference solution</h2>
+          <details data-reveal="http-reference">
+            <summary><span>Open the reference solution</span><span class="summary-label">Optional</span></summary>
+            <div class="solution-copy">
+              <p>
+                The reference solution puts the rules on the product body and turns on
+                ASP.NET Core's built-in validation for both writes. Quantity is from 1 to
+                100. Name has a rule that rejects a value with no non-whitespace character.
+                Validation runs before the handler. A failure is the 400 problem response,
+                and the handler does not save. A valid body keeps the starter's 201, 204,
+                and 404. The other valid approach is the same two checks inside the create
+                handler and the replace handler, returning a validation problem and
+                skipping the save. The trade-off is that each write has its own copy of
+                the rules, so the copies can diverge. The plausible miss is treating name
+                as a required string: the empty name is rejected, and the whitespace name
+                is stored with 201.
+              </p>
+            </div>
+          </details>
+        </section>
+      </div>
+
+      <aside class="side-column" aria-label="Challenge setup">
+        <section class="run-card" aria-labelledby="run-title">
+          <p class="section-kicker">Your local proof</p>
+          <h2 id="run-title">Clone, then test</h2>
+          <p>
+            Challenge directory: <code>request-validation</code>
+          </p>
+          <p>Setup: git and the .NET SDK.</p>
+          <pre><code>git clone https://github.com/mustafaAshfaq/dotnet-challenges.git
+cd dotnet-challenges/request-validation
+dotnet test</code></pre>
+          <a
+            class="repo-link"
+            href="https://github.com/mustafaAshfaq/dotnet-challenges/tree/main/request-validation"
+          >
+            Browse the challenge directory
+          </a>
+        </section>
+        <section class="prerequisite" aria-labelledby="prerequisite-title">
+          <p class="section-kicker" id="prerequisite-title">Prerequisite</p>
+          <p>No prerequisite.</p>
+        </section>
+        <p class="completion-note">
+          This catalog shows the requirements. The code and the proof run on your machine.
+        </p>
+      </aside>
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .challenge {
+    padding-block: 1.5rem 2rem;
+  }
+
+  .crumbs {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    min-height: 2.75rem;
+    margin-block-end: 1.25rem;
+    color: var(--muted);
+    font-size: 0.88rem;
+  }
+
+  .crumbs a {
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    font-weight: 650;
+  }
+
+  .hero {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(17rem, 0.9fr);
+    align-items: center;
+    gap: clamp(1.5rem, 4vw, 4rem);
+    overflow: hidden;
+    padding: clamp(1.5rem, 5vw, 4rem);
+    background-color: var(--ink);
+    background-image:
+      linear-gradient(rgb(255 255 255 / 4%) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(255 255 255 / 4%) 1px, transparent 1px);
+    background-size: 28px 28px;
+    color: white;
+  }
+
+  .hero::after {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: 5px;
+    background: #f0a343;
+    content: "";
+  }
+
+  .hero-copy,
+  .trace-card {
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero .eyebrow {
+    margin-block-end: 1.1rem;
+  }
+
+  .hero .eyebrow span {
+    color: #b6c5e1;
+  }
+
+  h1,
+  h2,
+  h3,
+  p {
+    margin-block-start: 0;
+  }
+
+  h1 {
+    max-width: 11ch;
+    margin-block-end: 0.9rem;
+    font-family: var(--display);
+    font-size: clamp(2.8rem, 6.5vw, 5.4rem);
+    font-weight: 750;
+    letter-spacing: -0.06em;
+    line-height: 0.96;
+  }
+
+  .hero-summary {
+    max-width: 38ch;
+    margin-block-end: 0;
+    color: #d4ddef;
+    font-size: clamp(1rem, 1.8vw, 1.2rem);
+  }
+
+  .trace-card {
+    padding: 1.15rem;
+    border: 1px solid #53627d;
+    background: #202f4c;
+    box-shadow: 0 16px 38px rgb(0 0 0 / 18%);
+    font-family: var(--mono);
+    font-size: 0.82rem;
+  }
+
+  .trace-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-block-end: 1.2rem;
+    color: #d0daeb;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+  }
+
+  .route {
+    display: block;
+    margin-block-end: 0.55rem;
+    color: #e6edfa;
+  }
+
+  .trace-card pre {
+    overflow-x: auto;
+    margin: 0;
+    padding: 0.85rem;
+    background: #15213a;
+    color: #f9d79c;
+    white-space: pre-wrap;
+  }
+
+  .trace-result {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding-block-start: 0.9rem;
+    color: #e4ebf7;
+  }
+
+  .status {
+    padding: 0.12rem 0.42rem;
+    background: #f0a343;
+    color: #17243b;
+    font-weight: 800;
+  }
+
+  .state-mark {
+    width: 1.35rem;
+    height: 1.35rem;
+    display: grid;
+    place-items: center;
+    border: 1px solid #87c6a9;
+    border-radius: 50%;
+    color: #a5e1c4;
+    font-weight: 800;
+  }
+
+  .content-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 17rem;
+    align-items: start;
+    gap: clamp(2rem, 5vw, 4.5rem);
+    padding-block-start: clamp(2.5rem, 6vw, 4.5rem);
+  }
+
+  .content-section + .content-section {
+    margin-block-start: clamp(2.8rem, 5vw, 4rem);
+  }
+
+  .section-kicker {
+    margin-block-end: 0.7rem;
+    color: var(--blue);
+  }
+
+  .content-section h2 {
+    margin-block-end: 0;
+    font-family: var(--display);
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1.15;
+  }
+
+  .decision h2 {
+    max-width: 48ch;
+    padding-inline-start: 1.1rem;
+    border-inline-start: 3px solid #d99030;
+    font-size: clamp(1.25rem, 2.2vw, 1.65rem);
+    font-weight: 600;
+    line-height: 1.5;
+  }
+
+  .section-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-block-end: 1.2rem;
+  }
+
+  .effect-count {
+    padding: 0.25rem 0.55rem;
+    border: 1px solid var(--line);
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
+
+  .effect-contract,
+  .effect-boundary {
+    max-width: 68ch;
+    margin-block: 1rem 0;
+    color: var(--muted);
+  }
+
+  .effect-list {
+    display: grid;
+    gap: 0;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    border-block-start: 1px solid var(--line);
+  }
+
+  .effect-list li {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+    gap: 0.9rem;
+    padding-block: 1.2rem;
+    border-block-end: 1px solid var(--line);
+  }
+
+  .effect-number {
+    width: 2rem;
+    height: 2rem;
+    display: grid;
+    place-items: center;
+    border: 1px solid #aab9cb;
+    color: var(--blue-strong);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .effect-list p {
+    max-width: 68ch;
+    margin-block-end: 0;
+  }
+
+  code,
+  pre {
+    font-family: var(--mono);
+    font-size: 0.9em;
+  }
+
+  .effect-list code {
+    padding: 0.06rem 0.25rem;
+    background: #e8eefb;
+    color: #173b99;
+  }
+
+  .side-column {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .run-card {
+    padding: 1.2rem;
+    border-top: 4px solid var(--blue);
+    background: var(--surface);
+    box-shadow: 0 10px 24px rgb(23 36 59 / 6%);
+  }
+
+  .run-card h2 {
+    margin-block-end: 0.55rem;
+    font-family: var(--display);
+    font-size: 1.35rem;
+    letter-spacing: -0.03em;
+  }
+
+  .run-card > p:not(.section-kicker) {
+    margin-block-end: 0.9rem;
+    color: var(--muted);
+    font-size: 0.92rem;
+  }
+
+  .run-card pre {
+    overflow-x: auto;
+    padding: 0.85rem;
+    margin: 0 0 1rem;
+    background: #17243b;
+    color: #f2f5f8;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .repo-link {
+    min-height: 2.75rem;
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+
+  .prerequisite {
+    padding: 1rem 1.2rem;
+    border: 1px solid var(--line);
+    background: #e8eef5;
+  }
+
+  .prerequisite .section-kicker {
+    color: var(--muted);
+  }
+
+  .prerequisite p:last-child {
+    margin-block-end: 0;
+    font-weight: 650;
+  }
+
+  .completion-note {
+    margin-block: 0;
+    color: var(--muted);
+    font-size: 0.82rem;
+  }
+
+  .disclosures {
+    display: grid;
+    gap: 0.65rem;
+    margin-block-start: 1.15rem;
+  }
+
+  details {
+    border: 1px solid var(--line);
+    background: var(--surface);
+  }
+
+  summary {
+    min-height: 3.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.65rem 0.9rem;
+    color: var(--ink);
+    cursor: pointer;
+    font-weight: 700;
+    list-style: none;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  summary::after {
+    width: 1.5rem;
+    height: 1.5rem;
+    flex: none;
+    display: grid;
+    place-items: center;
+    border: 1px solid #aab9cb;
+    border-radius: 50%;
+    color: var(--blue);
+    content: "+";
+    font-family: var(--mono);
+    font-size: 1rem;
+    line-height: 1;
+  }
+
+  details[open] > summary::after {
+    content: "−";
+  }
+
+  summary:hover {
+    background: #f5f7fb;
+  }
+
+  .summary-label {
+    margin-inline-start: auto;
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 500;
+    text-align: right;
+  }
+
+  details > p,
+  .solution-copy {
+    padding: 0 0.95rem 1rem;
+    margin-block-end: 0;
+    color: var(--muted);
+  }
+
+  .solution-copy p:last-child {
+    margin-block-end: 0;
+  }
+
+  .solution > h2 {
+    margin-block-end: 1rem;
+  }
+
+  .solution details {
+    border-color: #b9c9e6;
+    background: var(--surface-blue);
+  }
+
+  .solution details > summary {
+    min-height: 3.5rem;
+  }
+
+  .solution-copy {
+    color: var(--ink);
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+
+  @media (max-width: 900px) {
+    .content-grid {
+      grid-template-columns: minmax(0, 1fr) 15rem;
+      gap: 2rem;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .hero {
+      grid-template-columns: 1fr;
+    }
+
+    .trace-card {
+      max-width: 31rem;
+    }
+
+    .content-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .side-column {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .completion-note {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .challenge {
+      padding-block-start: 0.75rem;
+    }
+
+    .crumbs {
+      font-size: 0.8rem;
+    }
+
+    .hero {
+      margin-inline: -0.75rem;
+      padding: 1.5rem 1.25rem;
+    }
+
+    .side-column {
+      grid-template-columns: 1fr;
+    }
+
+    .effect-list li {
+      grid-template-columns: 2rem minmax(0, 1fr);
+      gap: 0.65rem;
+    }
+
+    .effect-number {
+      width: 1.75rem;
+      height: 1.75rem;
+    }
+
+    .summary-label {
+      font-size: 0.72rem;
+    }
+  }
+</style>

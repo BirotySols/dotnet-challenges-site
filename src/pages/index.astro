@@ -1,0 +1,218 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout
+  title=".NET Challenges — request-level practice"
+  description="Intermediate ASP.NET Core practice for developers who already build CRUD APIs."
+>
+  <main id="main" class="home">
+    <section class="intro">
+      <p class="eyebrow">A catalog of request-level decisions</p>
+      <h1>Practice the choices a template leaves to you.</h1>
+      <p class="audience">
+        Intermediate practice for developers who already build CRUD APIs.
+      </p>
+      <p class="intro-copy">
+        Each challenge asks for one observable behavior. Clone the starter,
+        make the decision, and let the local harness show whether its effects are there.
+      </p>
+    </section>
+
+    <section class="available" aria-labelledby="available-title">
+      <div class="section-heading">
+        <div>
+          <p class="section-kicker">First challenge</p>
+          <h2 id="available-title">HTTP API contracts</h2>
+        </div>
+        <span class="sequence" aria-label="Sequence position 1 of 9">01 <span>/ 09</span></span>
+      </div>
+      <p class="available-copy">
+        Decide what an invalid write means for the response and for the data already stored.
+      </p>
+      <a class="challenge-link" href={`${base}challenges/request-validation/`}>
+        Read the challenge <span aria-hidden="true">→</span>
+      </a>
+    </section>
+
+    <aside class="setup" aria-label="Setup">
+      <span class="setup-mark" aria-hidden="true">01</span>
+      <div>
+        <p class="section-kicker">What you need</p>
+        <p>Git and the .NET SDK. You do not need Node to use the catalog.</p>
+      </div>
+    </aside>
+  </main>
+</BaseLayout>
+
+<style>
+  .home {
+    padding-block: clamp(3.5rem, 9vw, 7rem) 2rem;
+  }
+
+  .intro {
+    max-width: 52rem;
+    padding-block-end: clamp(2.5rem, 6vw, 4.5rem);
+  }
+
+  .intro .eyebrow {
+    color: var(--blue);
+    margin: 0 0 1.1rem;
+  }
+
+  h1,
+  h2,
+  p {
+    margin-block-start: 0;
+  }
+
+  h1 {
+    max-width: 13ch;
+    margin-block-end: 1rem;
+    font-family: var(--display);
+    font-size: clamp(2.7rem, 6.4vw, 5rem);
+    font-weight: 750;
+    letter-spacing: -0.055em;
+    line-height: 0.99;
+  }
+
+  .audience {
+    margin-block-end: 0.65rem;
+    color: var(--blue-strong);
+    font-size: clamp(1.05rem, 1.7vw, 1.3rem);
+    font-weight: 650;
+  }
+
+  .intro-copy {
+    max-width: 57ch;
+    margin-block-end: 0;
+    color: var(--muted);
+    font-size: 1.05rem;
+  }
+
+  .available {
+    max-width: 56rem;
+    padding: clamp(1.4rem, 4vw, 2.6rem);
+    border: 1px solid var(--line);
+    border-inline-start: 5px solid var(--blue);
+    background: var(--surface);
+    box-shadow: 0 14px 36px rgb(23 36 59 / 6%);
+  }
+
+  .section-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.25rem;
+  }
+
+  .section-kicker {
+    margin-block-end: 0.55rem;
+    color: var(--muted);
+  }
+
+  h2 {
+    margin-block-end: 0;
+    font-family: var(--display);
+    font-size: clamp(1.7rem, 3vw, 2.4rem);
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+  }
+
+  .sequence {
+    color: var(--blue);
+    font-family: var(--mono);
+    font-size: 1.15rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .sequence span {
+    color: var(--muted);
+    font-size: 0.82rem;
+  }
+
+  .available-copy {
+    max-width: 52ch;
+    margin-block: 1rem 1.4rem;
+    color: var(--muted);
+  }
+
+  .challenge-link {
+    min-height: 2.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.65rem 1rem;
+    background: var(--blue);
+    color: white;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .challenge-link:hover {
+    background: var(--blue-strong);
+    color: white;
+  }
+
+  .challenge-link span {
+    font-size: 1.15rem;
+    transition: transform 160ms ease-out;
+  }
+
+  .challenge-link:hover span {
+    transform: translateX(3px);
+  }
+
+  .setup {
+    max-width: 56rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-block-start: 2rem;
+    padding: 1.2rem 1.4rem;
+    border: 1px solid var(--line);
+    background: #e8eef5;
+  }
+
+  .setup-mark {
+    display: grid;
+    width: 2.2rem;
+    height: 2.2rem;
+    flex: none;
+    place-items: center;
+    border: 1px solid #b7c5d5;
+    color: var(--blue-strong);
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .setup .section-kicker {
+    margin-block-end: 0.2rem;
+  }
+
+  .setup p:last-child {
+    margin-block-end: 0;
+  }
+
+  @media (max-width: 520px) {
+    .section-heading {
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .setup {
+      padding: 1rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .challenge-link span {
+      transition: none;
+    }
+  }
+</style>
