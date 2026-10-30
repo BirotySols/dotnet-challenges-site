@@ -10,15 +10,33 @@ const base = import.meta.env.BASE_URL;
 >
   <main id="main" class="home">
     <section class="intro">
-      <p class="eyebrow">A catalog of request-level decisions</p>
-      <h1>Practice the choices a template leaves to you.</h1>
-      <p class="audience">
-        Intermediate practice for developers who already build CRUD APIs.
-      </p>
-      <p class="intro-copy">
-        Each challenge asks for one observable behavior. Clone the starter,
-        make the decision, and let the local harness show whether its effects are there.
-      </p>
+      <div class="intro-copy-block">
+        <p class="eyebrow">A catalog of request-level decisions</p>
+        <h1>Practice the choices a template leaves to you.</h1>
+        <p class="audience">
+          Intermediate practice for developers who already build CRUD APIs.
+        </p>
+        <p class="intro-copy">
+          Each challenge asks for one observable behavior. Clone the starter,
+          make the decision, and let the local harness show whether its effects are there.
+        </p>
+      </div>
+      <aside class="status-slip" aria-label="Example from the first challenge">
+        <div class="slip-top">
+          <span>Request trace</span>
+          <span>01 / 04</span>
+        </div>
+        <code class="slip-route">POST /products</code>
+        <pre><code>{`{ "name": " ", "quantity": 0 }`}</code></pre>
+        <p class="slip-result">
+          <span class="stamp">400</span>
+          <span>problem names both fields</span>
+        </p>
+        <p class="slip-result">
+          <span class="state-mark" aria-hidden="true">=</span>
+          <span>stored product stays unchanged</span>
+        </p>
+      </aside>
     </section>
 
     <section class="available" aria-labelledby="available-title">
@@ -38,7 +56,6 @@ const base = import.meta.env.BASE_URL;
     </section>
 
     <aside class="setup" aria-label="Setup">
-      <span class="setup-mark" aria-hidden="true">01</span>
       <div>
         <p class="section-kicker">What you need</p>
         <p>Git and the .NET SDK. You do not need Node to use the catalog.</p>
@@ -49,17 +66,19 @@ const base = import.meta.env.BASE_URL;
 
 <style>
   .home {
-    padding-block: clamp(3.5rem, 9vw, 7rem) 2rem;
+    padding-block: clamp(2.5rem, 7vw, 5rem) 2rem;
   }
 
   .intro {
-    max-width: 52rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(16rem, 22rem);
+    align-items: end;
+    gap: clamp(1.5rem, 4vw, 3.5rem);
     padding-block-end: clamp(2.5rem, 6vw, 4.5rem);
   }
 
   .intro .eyebrow {
-    color: var(--blue);
-    margin: 0 0 1.1rem;
+    margin: 0 0 1rem;
   }
 
   h1,
@@ -69,63 +88,64 @@ const base = import.meta.env.BASE_URL;
   }
 
   h1 {
-    max-width: 13ch;
+    max-width: 14ch;
     margin-block-end: 1rem;
     font-family: var(--display);
-    font-size: clamp(2.7rem, 6.4vw, 5rem);
-    font-weight: 750;
-    letter-spacing: -0.055em;
-    line-height: 0.99;
+    font-size: clamp(2.4rem, 5.4vw, 4.25rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.02;
   }
 
   .audience {
+    max-width: 36ch;
     margin-block-end: 0.65rem;
-    color: var(--blue-strong);
-    font-size: clamp(1.05rem, 1.7vw, 1.3rem);
-    font-weight: 650;
+    color: var(--ink);
+    font-size: clamp(1.05rem, 1.7vw, 1.25rem);
+    font-weight: 700;
+    line-height: 1.4;
   }
 
   .intro-copy {
-    max-width: 57ch;
+    max-width: 58ch;
     margin-block-end: 0;
     color: var(--muted);
     font-size: 1.05rem;
+    line-height: 1.6;
   }
 
   .available {
-    max-width: 56rem;
-    padding: clamp(1.4rem, 4vw, 2.6rem);
+    padding: clamp(1.25rem, 3vw, 2rem);
     border: 1px solid var(--line);
-    border-inline-start: 5px solid var(--blue);
+    border-inline-start: 4px solid var(--ink);
     background: var(--surface);
-    box-shadow: 0 14px 36px rgb(23 36 59 / 6%);
   }
 
   .section-heading {
     display: flex;
+    flex-wrap: wrap;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 1.25rem;
+    gap: 0.75rem 1.25rem;
   }
 
   .section-kicker {
     margin-block-end: 0.55rem;
-    color: var(--muted);
   }
 
   h2 {
     margin-block-end: 0;
     font-family: var(--display);
     font-size: clamp(1.7rem, 3vw, 2.4rem);
-    letter-spacing: -0.04em;
+    font-weight: 700;
+    letter-spacing: -0.03em;
     line-height: 1.1;
   }
 
   .sequence {
-    color: var(--blue);
+    color: var(--pass);
     font-family: var(--mono);
-    font-size: 1.15rem;
-    font-weight: 700;
+    font-size: 1.05rem;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
   }
@@ -136,31 +156,37 @@ const base = import.meta.env.BASE_URL;
   }
 
   .available-copy {
-    max-width: 52ch;
+    max-width: 62ch;
     margin-block: 1rem 1.4rem;
     color: var(--muted);
+    line-height: 1.6;
   }
 
   .challenge-link {
-    min-height: 2.9rem;
+    min-height: 3rem;
     display: inline-flex;
     align-items: center;
     gap: 0.7rem;
-    padding: 0.65rem 1rem;
-    background: var(--blue);
+    padding: 0.7rem 1rem;
+    background: var(--action);
     color: white;
+    font-family: var(--display);
     font-weight: 700;
     text-decoration: none;
+    transition: background-color 180ms ease-out;
   }
 
   .challenge-link:hover {
-    background: var(--blue-strong);
+    background: var(--action-hover);
     color: white;
   }
 
+  .challenge-link:active {
+    background: var(--pass);
+  }
+
   .challenge-link span {
-    font-size: 1.15rem;
-    transition: transform 160ms ease-out;
+    transition: transform 180ms ease-out;
   }
 
   .challenge-link:hover span {
@@ -168,49 +194,40 @@ const base = import.meta.env.BASE_URL;
   }
 
   .setup {
-    max-width: 56rem;
-    display: flex;
-    align-items: flex-start;
-    gap: 1rem;
-    margin-block-start: 2rem;
-    padding: 1.2rem 1.4rem;
+    margin-block-start: 1.5rem;
+    padding: 1.15rem 1.25rem;
     border: 1px solid var(--line);
-    background: #e8eef5;
-  }
-
-  .setup-mark {
-    display: grid;
-    width: 2.2rem;
-    height: 2.2rem;
-    flex: none;
-    place-items: center;
-    border: 1px solid #b7c5d5;
-    color: var(--blue-strong);
-    font-family: var(--mono);
-    font-size: 0.75rem;
-    font-weight: 700;
+    background: var(--mark);
   }
 
   .setup .section-kicker {
-    margin-block-end: 0.2rem;
+    margin-block-end: 0.35rem;
+    color: var(--muted);
   }
 
   .setup p:last-child {
     margin-block-end: 0;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 760px) {
+    .intro {
+      grid-template-columns: 1fr;
+    }
+
+    .status-slip {
+      order: -1;
+    }
   }
 
   @media (max-width: 520px) {
-    .section-heading {
-      flex-direction: column;
-      gap: 0.8rem;
-    }
-
     .setup {
       padding: 1rem;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .challenge-link,
     .challenge-link span {
       transition: none;
     }
