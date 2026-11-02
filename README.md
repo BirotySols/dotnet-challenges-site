@@ -12,10 +12,10 @@ npm run dev
 npm run build
 ```
 
-The first release is being delivered one challenge at a time. The reference
-solution for HTTP API contracts lives in `reference-solutions/request-validation/`.
-The exercise repository's maintainer check copies those files over the naive
-starter and runs the same harness.
+The first release is being delivered one challenge at a time. Reference
+solutions live in `reference-solutions/request-validation/` and
+`reference-solutions/input-trust/`. The exercise repository's maintainer check
+copies those files over the naive starter and runs the same harness.
 
 GitHub Actions builds the static site and deploys it to GitHub Pages after
 changes reach `main`.

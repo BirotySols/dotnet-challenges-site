@@ -51,19 +51,14 @@ const base = import.meta.env.BASE_URL;
 
 <script>
   const openReveals = new Set<string>();
-  const unlockedHints = new Set<string>();
 
   const restoreReveals = () => {
     const disclosures = document.querySelectorAll<HTMLDetailsElement>('[data-reveal]');
 
     for (const disclosure of disclosures) {
       const revealId = disclosure.dataset.reveal!;
-      const hintNumber = Number(disclosure.dataset.hintNumber);
       const isOpen = openReveals.has(revealId);
       disclosure.open = isOpen;
-      if (isOpen && hintNumber > 0) {
-        unlockedHints.add(`hint-${hintNumber}`);
-      }
 
       if (disclosure.dataset.bound === 'true') {
         continue;
@@ -73,9 +68,6 @@ const base = import.meta.env.BASE_URL;
       disclosure.addEventListener('toggle', () => {
         if (disclosure.open) {
           openReveals.add(revealId);
-          if (hintNumber > 0) {
-            unlockedHints.add(`hint-${hintNumber}`);
-          }
         } else {
           openReveals.delete(revealId);
         }
@@ -90,7 +82,11 @@ const base = import.meta.env.BASE_URL;
   const updateHintGates = () => {
     for (const gate of document.querySelectorAll<HTMLElement>('[data-hint-gate]')) {
       const previousHint = Number(gate.dataset.hintGate) - 1;
-      gate.hidden = !unlockedHints.has(`hint-${previousHint}`);
+      const previous = gate
+        .closest('.disclosures')
+        ?.querySelector<HTMLDetailsElement>(`[data-hint-number="${previousHint}"]`);
+      const revealId = previous?.dataset.reveal;
+      gate.hidden = revealId === undefined || !openReveals.has(revealId);
     }
   };
 
